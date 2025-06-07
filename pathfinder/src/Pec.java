@@ -24,6 +24,9 @@ public class Pec {
     }
 
     public ArrayList<Event> getEvents() {
+        if (index >= tau) {
+            System.exit(0); 
+        }
         return que.get(index++);
     }
 
@@ -31,7 +34,7 @@ public class Pec {
     public static void main(String[] args) {
         // Example usage of Pec class
         Pec pec = new Pec(10);
-        pec.addEvent(new Death(), 0);
+        pec.addEvent(new Death(new Individual(0,0,0,0,0,0,0,0)), 0);
         pec.addEvent(new Reproduction(), 1);
         pec.addEvent(new Move(), 2);
 

@@ -1,6 +1,10 @@
 //TODO: Implement the Death event logic
 public class Death implements Event {
-    Death(){
+    public Individual individual;
+
+    Death(Individual individual){
+        this.individual = individual;
+        
         // Constructor for Death event
         System.out.println("Death event created.");
     }

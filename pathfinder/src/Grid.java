@@ -50,11 +50,29 @@ public class Grid {
         if (scz == null) return 1; // Default cost if no special zones
 
         for (int[] zone : scz) {
-            if (zone[0] <= x && x <= zone[2] && zone[1] <= y && y <= zone[3]) {
+            if ((zone[0] == x || x == zone[2]) && (zone[1] == y || y == zone[3])) {
                 return zone[4]; // Return the cost from the special cost zone
             }
         }
         return 1; // Default cost if not in any special zone
+    }
+
+
+    // TESTING
+    public static void main(String[] args) {
+        // Example usage of Grid class
+        int[][] scz = {{1, 1, 3, 3, 5}}; // Special cost zone with cost 5
+        int[][] obs = {{2, 3}}; // Obstacle at (1, 1)
+        
+        Grid grid = new Grid(5, 5, scz, obs);
+        
+        ArrayList<int[]> moves = grid.getValidMoves(2, 2);
+        for (int[] move : moves) {
+            System.out.println("Valid move to: (" + move[0] + ", " + move[1] + ")");
+        }
+        
+        System.out.println("Cost to move to (0, 0): " + grid.getCost(2, 2));
+        System.out.println("Cost to move to (1, 1): " + grid.getCost(1, 1));
     }
 }
     
