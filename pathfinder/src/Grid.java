@@ -10,16 +10,24 @@ public class Grid {
 
     private int cmax;
 
-    Grid(int n, int m, int[][] scz, int[][] obs) {
+    Grid(int xi, int yi, int xf, int yf, int n, int m, int[][] scz, int[][] obs) {
+        this.xi = xi; // Start x-coordinate
+        this.yi = yi; // Start y-coordinate
+        this.xf = xf; // End x-coordinate
+        this.yf = yf; // End y-coordinate
         this.n = n; // Number of rows
         this.m = m; // Number of columns
         this.scz = scz; // Special Cost Zones
         this.obs = obs; // Obstacles
 
         this.cmax = 0; // Maximum cost, initialized to 0
-        for (int[] zone : scz) {
-            if (zone[4] > cmax) {
-                cmax = zone[4]; // Update maximum cost based on special zones
+        if (scz.length == 0) {
+            cmax = 1;
+        } else {
+            for (int[] zone : scz) {
+                if (zone[4] > cmax) {
+                    cmax = zone[4]; // Update maximum cost based on special zones
+                }
             }
         }
     }
@@ -36,16 +44,16 @@ public class Grid {
         // Returns a list of valid moves from position (x, y)
         ArrayList<int[]> validMoves = new ArrayList<>();
         
-        if (x > 0 && !isObstacle(x - 1, y)) {
+        if (x > 1 && !isObstacle(x - 1, y)) {
             validMoves.add(new int[] {x - 1, y});
         }
-        if (x < n - 1 && !isObstacle(x + 1, y)) {
+        if (x < n && !isObstacle(x + 1, y)) {
             validMoves.add(new int[] {x + 1, y});
         }
-        if (y > 0 && !isObstacle(x, y - 1)) {
+        if (y > 1 && !isObstacle(x, y - 1)) {
             validMoves.add(new int[] {x, y - 1});
         }
-        if (y < m - 1 && !isObstacle(x, y + 1)) {
+        if (y < m && !isObstacle(x, y + 1)) {
             validMoves.add(new int[] {x, y + 1});
         }
         
@@ -97,6 +105,16 @@ public class Grid {
         return new int[]{xf, yf};
     }
 
+    @Override
+    public String toString() {
+        return "Grid{" +
+                "m=" + m +
+                ", n=" + n +
+                ", start=(" + xi + ", " + yi + ")" +
+                ", end=(" + xf + ", " + yf + ")" +
+                ", cmax=" + cmax +
+                '}';
+    }
 
     // TESTING
     public static void main(String[] args) {
@@ -104,12 +122,6 @@ public class Grid {
         int[][] scz = {{1, 1, 3, 3, 5}}; // Special cost zone with cost 5
         int[][] obs = {{2, 3}}; // Obstacle at (1, 1)
         
-        Grid grid = new Grid(5, 5, scz, obs);
-        
-        ArrayList<int[]> moves = grid.getValidMoves(2, 2);
-        for (int[] move : moves) {
-            System.out.println("Valid move to: (" + move[0] + ", " + move[1] + ")");
-        }
         
     }
 }

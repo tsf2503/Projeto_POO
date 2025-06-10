@@ -1,21 +1,19 @@
-import java.util.ArrayList;
 import java.io.File;
 import java.util.Random;
 import java.util.Scanner;
 
 public class Simulator {
-    Grid grid;
-    Pec pec;
-    ArrayList<Individual> individuals;
-    
-    int vmax;
+    private Grid grid;
+    private Pec pec;
+    private Population population;
+    private int observation;
     
     Simulator(String[] args)
     {
-        int n = 0, m = 0, xi = 0, yi = 0, xf = 0, yf = 0, n_scz = 0, n_obs = 0, tau = 0, v = 0, k = 0, mu = 0, delta = 0, ro = 0;
+        int n = 0, m = 0, xi = 0, yi = 0, xf = 0, yf = 0, n_scz = 0, n_obs = 0, tau = 0, v = 0, k = 0, mu = 0, delta = 0, ro = 0, vmax = 0;
         int[][] scz = null, obs = null;
         
-        if (args[0] == "-r") {
+        if (args[0].equals("-r")) {
             try {
                 n = Integer.parseInt(args[1]);
                 m = Integer.parseInt(args[2]);
@@ -121,12 +119,67 @@ public class Simulator {
         printConfig(n, m, xi, yi, xf, yf, n_scz, n_obs, tau, v, k, mu, delta, ro, scz, obs);
         
         // Initialize the grid, pec, and individuals
-        grid = new Grid(n, m, scz, obs);
+        grid = new Grid(xi, yi, xf, yf, n, m, scz, obs);
         pec = new Pec(tau);
-        individuals = new ArrayList<Individual>();
+        population = new Population(vmax, k, mu, delta, ro);
         for (int i = 0; i < v; i++) {
-            individuals.add(new Individual(xi, yi, xf, yf, k, mu, delta, ro));
+            Individual individual = new Individual(population, grid);
+            population.addIndividual(individual);
+            pec.addEvent(new Move(individual.getMoveTime(), individual, pec));
+            pec.addEvent(new Reproduction(individual.getReproductionTime(), individual, pec));
+            pec.addEvent(new Death(individual.getDeathTime(), individual, pec));
         }
+
+        observation = 1;
+    }
+
+    public void run()
+    {
+        int result;
+        while ((result = pec.next()) != -1) {
+            if (result == 1) {
+                System.out.println(this);
+                observation++;
+            }
+        }
+        System.out.println(this);
+        outputResults();
+    }
+
+    @Override
+    public String toString() {
+        boolean isCost = population.isPathComplete();
+        return isCost ?
+        "Observation:" + observation + ":\n\t\t" +
+                "Present time:\t\t\t" + pec.getTime() + "\n\t\t" +
+                "Number of realized events:\t" + pec.getEventsCount() + "\n\t\t" +
+                "Population size:\t\t" + population.getSize() + "\n\t\t" +
+                "Final point has been hit:\t" + "yes" + "\n\t\t" +
+                "Path of the best fit:\t" + population.getBestPath() + "\n\t\t" +
+                "Best path cost:\t\t\t" + population.getBestPathCost() + "\n\t\t"
+                :
+        "Observation:" + observation + ":\n\t\t" +
+                "Present time:\t\t\t" + pec.getTime() + "\n\t\t" +
+                "Number of realized events:\t" + pec.getEventsCount() + "\n\t\t" +
+                "Population size:\t\t" + population.getSize() + "\n\t\t" +
+                "Final point has been hit:\t" + "no" + "\n\t\t" +
+                "Path of the best fit:\t" + population.getBestPath() + "\n\t\t" +
+                "Best path cost:\t\t\t" + population.getBestComfort() + "\n\t\t";
+
+    }
+
+    private void outputResults()
+    {
+        boolean isCost = population.isPathComplete();
+
+        String output = isCost ?
+            "Best fit individual:\t" + population.getBestPath() +
+            "with cost:\t\t\t" + population.getBestPathCost()
+            :
+            "Best fit individual:\t" + population.getBestPath() +
+            "with comfort:\t\t" + population.getBestComfort();
+
+        System.out.println(output);
     }
 
     private static void printConfig(int n, int m, int xi, int yi, int xf, int yf, int n_scz, int n_obs, int tau, int v, int k, int mu, int delta, int ro, int[][] scz, int[][] obs)
@@ -181,5 +234,7 @@ public class Simulator {
         }            
 
         Simulator simulator = new Simulator(args);
+
+        simulator.run();
     }
 }

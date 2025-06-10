@@ -3,50 +3,55 @@ import java.util.ArrayList;
 
 public class Pec {
 
-    private Simulator sim;
     private PriorityQueue<Event> que;
 
     private int tau;
-    private int time;
-    private int timeDiv;
+    private double time;
+    private double nextUpdateTime;
+    private double timeDiv;
 
-    private int events = 0;
+    private int events;
 
-    public Pec(int tau, Simulator sim) {
+    public Pec(int tau) {
         this.tau = tau;
-        this.timeDiv = (int) Math.floor(tau / 20);
+        this.timeDiv = tau / 20.0;
+        this.nextUpdateTime = this.timeDiv;
+        this.time = 0.0;
+        this.events = 0;
 
-        this.sim = sim;
-        que = new PriorityQueue<>((e1, e2) -> Integer.compare(e1.getTime(), e2.getTime()));
+        que = new PriorityQueue<>((e1, e2) -> Double.compare(e1.getTime(), e2.getTime()));
     }
 
     public void addEvent(Event e) {
-        if (e.getTime() >= 0 && e.getTime() < tau) {
+        if (e.getTime() >= 0 && e.getTime() <= tau)
             que.add(e);
-        } else {
-            throw new IllegalArgumentException("Event time must be between 0 and " + tau);
-        }
+        
     }
 
-    public void next() {
+    public int next() {
         if (que.isEmpty()) {
-            sim.end();
-            return;
+            // sim.print()
+            // sim.end()
+            return -1;
         }
 
-        if (peekNextEvent().getTime() == time) {
-            getNextEvent().execute();
-            events++;
+        if (peekNextEvent().getTime() >= nextUpdateTime) {
+            // sim.print()
+            time = nextUpdateTime;
+            nextUpdateTime += timeDiv;
+            return 1;
         } else {
-            if (time % timeDiv == 0) {
-                sim.update();
-                sim.print();
-            }
-            time++;
+            Event e = getNextEvent();
+
+            e.execute();
+            events++;
+
+            time = e.getTime();
+            return 0;
         }
     }
 
-    public int getTime() {
+    public double getTime() {
         return time;
     }
 
@@ -62,25 +67,61 @@ public class Pec {
         return que.poll();
     }
 
+    @Override
+    public String toString() {
+        return "Pec{" +
+                "tau=" + tau +
+                ", time=" + time +
+                ", nextUpdateTime=" + nextUpdateTime +
+                ", timeDiv=" + timeDiv +
+                ", events=" + events +
+                ", que=" + que +
+                '}';
+    }
+
     //TESTING
     public static void main(String[] args) {
         // Example usage of Pec class
         Pec pec = new Pec(10);
-        pec.addEvent(new Death(new Individual(0,0,0,0,0,0,0,0)), 0);
-        pec.addEvent(new Reproduction(), 1);
-        pec.addEvent(new Move(), 2);
+        int [][] obstacles = {};
+        int [][] specialZones = {};
+        System.out.println(obstacles + " " + specialZones);
+        Grid grid = new Grid(1, 1, 10, 10, 10, 10, specialZones, obstacles);
+        Population population = new Population(20, 3, 5, 1, 1);
+        Individual individual = new Individual(population, grid);
 
-        ArrayList<Event> eventsAtTime0 = pec.getEvents();
-        System.out.println("Events at time 0: " + eventsAtTime0.size());
-        eventsAtTime0.get(0).execute();
+        System.out.println(pec.toString());
+        System.out.println(grid.toString());
+        System.out.println(population.toString());
+        System.out.println(individual.toString());
+
+
+        pec.addEvent(new Death(0.5 , individual, pec));
+        pec.addEvent(new Reproduction(0.2,individual, pec));
+        pec.addEvent(new Move(0.1, individual, pec));
+
+        System.out.println(pec.toString());
         
-        ArrayList<Event> eventsAtTime1 = pec.getEvents();
-        System.out.println("Events at time 1: " + eventsAtTime1.size());
-        eventsAtTime1.get(0).execute();
+        System.out.println(pec.next());
+        System.out.println(pec.toString());
+        System.out.println("Events count: " + pec.getEventsCount());
+        System.out.println("Next Event: " + pec.peekNextEvent().toString());
+
+        while (true) {
+            // Continue processing events until the queue is empty
+            int result = pec.next();
+            System.out.println(pec);
+            System.out.println("Next event result: " + result);
+            if (result == -1) {
+                break;
+            }
+        }
+
+        System.out.println("Final Events count: " + pec.getEventsCount());
+        System.out.println("Final time: " + pec.getTime());
+        System.out.println("Final Pec state: " + pec.toString());
+
         
-        ArrayList<Event> eventsAtTime2 = pec.getEvents();
-        System.out.println("Events at time 2: " + eventsAtTime2.size());
-        eventsAtTime2.get(0).execute();
     }
 }
 

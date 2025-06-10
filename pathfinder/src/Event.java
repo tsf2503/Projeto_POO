@@ -1,16 +1,16 @@
 abstract class Event {
 
     protected Pec pec;
-    protected int time;
+    protected double time;
     protected Individual individual;
 
-    public Event(int time, Individual individual, Pec pec) {
+    public Event(double time, Individual individual, Pec pec) {
         this.time = time;
         this.individual = individual;
         this.pec = pec;
     }
 
-    public int getTime() {
+    public double getTime() {
         return time;
     }
     public Individual getIndividual() {
@@ -18,6 +18,14 @@ abstract class Event {
     }
     public Pec getPec() {
         return pec;
+    }
+
+    @Override
+    public String toString() {
+        return "Event{" +
+                "time=" + time +
+                ", individual=" + individual +
+                '}';
     }
 
     abstract void execute();

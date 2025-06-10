@@ -15,8 +15,8 @@ public class Population {
 
     private int k, mu, delta, ro;
 
-    public Population(int size, int maxSize, int k, int mu, int delta, int ro, Grid grid) {
-        this.size = size;
+    public Population(int maxSize, int k, int mu, int delta, int ro) {
+        this.size = 0;
         this.maxSize = maxSize;
         this.k = k;
         this.mu = mu;
@@ -100,6 +100,23 @@ public class Population {
             // TODO Handle case where individual is not found
             throw new IllegalArgumentException("Individual not found in population.");
         }
+    }
+
+    @Override
+    public String toString() {
+        return "Population{" +
+                "size=" + size +
+                ", maxSize=" + maxSize +
+                ", isPathComplete=" + isPathComplete +
+                ", bestPathCost=" + bestPathCost +
+                ", bestPath=" + bestPath +
+                ", bestComfort=" + bestComfort +
+                ", k=" + k +
+                ", mu=" + mu +
+                ", delta=" + delta +
+                ", ro=" + ro +
+                ", individuals=" + individuals +
+                "}";
     }
 
 }

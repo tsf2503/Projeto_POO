@@ -12,7 +12,7 @@ public class Individual {
 
     private double comfort;
 
-    Individual(int pathCost, int pathLength, double comfort, ArrayList<int[]> path, Population population, Grid grid) {
+    private Individual(int pathCost, int pathLength, double comfort, ArrayList<int[]> path, Population population, Grid grid) {
         this.pathCost = pathCost;
         this.pathLength = pathLength;
         this.path = path;
@@ -20,7 +20,6 @@ public class Individual {
 
         this.population = population;
         this.grid = grid;
-        population.addIndividual(this);
     }
 
     Individual(Population population, Grid grid) {
@@ -30,18 +29,29 @@ public class Individual {
         this.comfort = getComfort();
     }
 
+    public boolean isAlive() {
+        return population != null;
+    }
+
     private int getDistToFinish() {
         return Math.abs(path.getLast()[0] - grid.getEndCoordinates()[0])
         + Math.abs(path.getLast()[1] - grid.getEndCoordinates()[1]);
     }
 
     private double getComfort() {
-        return Math.pow(1 - (pathCost - pathLength + 2) / ((grid.getCmax() - 1) * pathLength + 3), population.getK()) *
-                Math.pow(1 - getDistToFinish() / (grid.getSize() + 1), population.getK());
+        return Math.pow(1 - ((pathCost - pathLength + 2.0) / ((grid.getCmax() - 1.0) * pathLength + 3.0)), population.getK()) *
+                Math.pow(1 - getDistToFinish() / (grid.getSize() + 1.0), population.getK());
     }
 
     private void chronoBreak(int x, int y) {
-        int cycleStartIndex = path.indexOf(new int[] {x, y});
+        int cycleStartIndex;
+
+        for (cycleStartIndex = 0; cycleStartIndex < path.size(); cycleStartIndex++) {
+            if (path.get(cycleStartIndex)[0] == x && path.get(cycleStartIndex)[1] == y) {
+                break;
+            }
+        }
+
         pathLength -= (path.size() - cycleStartIndex);
         for (int i = path.size() - 1; i > cycleStartIndex; i--) {
             pathCost -= grid.getCost(path.get(i)[0], path.get(i)[1], path.get(i - 1)[0], path.get(i - 1)[1]);
@@ -49,21 +59,22 @@ public class Individual {
         }
     }
 
-    public int getDeathIndex() {
-        return (int) Math.ceil((1 - Math.log(1 - comfort)) * population.getMu());
+    public double getDeathTime() {
+        return (1 - Math.log(1 - comfort)) * population.getMu();
     }
 
-    public int getMoveIndex() {
-        return (int) Math.ceil((1 - Math.log(comfort)) * population.getDelta());
+    public double getMoveTime() {
+        return (1 - Math.log(comfort)) * population.getDelta();
     }
 
-    public int getReproductionIndex() {
-        return (int) Math.ceil((1 - Math.log(comfort)) * population.getRo());
+    public double getReproductionTime() {
+        return (1 - Math.log(comfort)) * population.getRo();
     }
 
 
     public void death() {
         population.removeIndividual(this);
+        population = null;
     }
 
     public void move() {
@@ -71,7 +82,8 @@ public class Individual {
 
         int randomIndex = (int) (Math.random() * validMoves.size());
         int[] nextMove = validMoves.get(randomIndex);
-        int[] newPos = new int[] {path.getLast()[0] + nextMove[0], path.getLast()[1] + nextMove[1]};
+        // TODO se nao se mexer (validMoves tamanho 0) morre?
+        int[] newPos = new int[] {nextMove[0], nextMove[1]};
 
         if (path.contains(newPos)) {
             // If the new position is already in the path, delete cycle
@@ -114,5 +126,15 @@ public class Individual {
         child.chronoBreak(path.get(lastPosIndex)[0], path.get(lastPosIndex)[1]);
 
         return child;
+    }
+
+    @Override
+    public String toString() {
+        return "Individual{" +
+                "pathCost=" + pathCost +
+                ", pathLength=" + pathLength +
+                ", comfort=" + comfort +
+                ", path=" + path +
+                '}';
     }
 }
