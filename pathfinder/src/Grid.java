@@ -1,16 +1,35 @@
 import java.util.ArrayList;
 
 public class Grid {
-    int m;
-    int n;
-    int[][] scz; // Special Cost Zones
-    int[][] obs; // Obstacles
+    private int m;
+    private int n;
+    private int xi, yi; // Start coordinates
+    private int xf, yf; // End coordinates
+    private int[][] scz; // Special Cost Zones
+    private int[][] obs; // Obstacles
+
+    private int cmax;
 
     Grid(int n, int m, int[][] scz, int[][] obs) {
         this.n = n; // Number of rows
         this.m = m; // Number of columns
         this.scz = scz; // Special Cost Zones
         this.obs = obs; // Obstacles
+
+        this.cmax = 0; // Maximum cost, initialized to 0
+        for (int[] zone : scz) {
+            if (zone[4] > cmax) {
+                cmax = zone[4]; // Update maximum cost based on special zones
+            }
+        }
+    }
+
+    public int getSize() {
+        return n + m;
+    }
+
+    public int getCmax() {
+        return cmax; // Returns the maximum cost from special zones
     }
     
     public ArrayList<int[]> getValidMoves(int x, int y) {
@@ -45,16 +64,37 @@ public class Grid {
         return false; // Not an obstacle
     }
 
-    public int getCost(int x, int y) {
-        // Returns the cost of moving to (x, y)
+    public int getCost(int xi, int yi, int xf, int yf) {
+        // Returns the cost of moving from (xi, yi) to (xf, yf)
         if (scz == null) return 1; // Default cost if no special zones
 
+        if (xi > xf) {
+            xi = xi ^ xf;
+            xf = xi ^ xf;
+            xi = xi ^ xf; // Swap xi and xf
+        }
+        if (yi > yf) {
+            yi = yi ^ yf;
+            yf = yi ^ yf;
+            yi = yi ^ yf; // Swap yi and yf
+        }
+
+        int max = 1;
         for (int[] zone : scz) {
-            if ((zone[0] == x || x == zone[2]) && (zone[1] == y || y == zone[3])) {
-                return zone[4]; // Return the cost from the special cost zone
+            if ( zone[4] > max && ( ((xi == zone[0] || xi == zone[2]) && zone[1] <= yi && yi <= zone[3]) ||
+                                    ((yi == zone[1] || yi == zone[3]) && zone[0] <= xi && xi <= zone[2]) ) ) {
+                max = zone[4];
             }
         }
-        return 1; // Default cost if not in any special zone
+        return max; // Default cost if not in any special zone
+    }
+
+    public int[] getStartCoordinates() {
+        return new int[]{xi, yi};
+    }
+
+    public int[] getEndCoordinates() {
+        return new int[]{xf, yf};
     }
 
 
@@ -71,8 +111,6 @@ public class Grid {
             System.out.println("Valid move to: (" + move[0] + ", " + move[1] + ")");
         }
         
-        System.out.println("Cost to move to (0, 0): " + grid.getCost(2, 2));
-        System.out.println("Cost to move to (1, 1): " + grid.getCost(1, 1));
     }
 }
     

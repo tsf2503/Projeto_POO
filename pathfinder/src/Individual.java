@@ -1,15 +1,118 @@
+import java.util.ArrayList;
+
 // TODO: implement Individual class
 public class Individual {
-    int xi, yi, xf, yf, k, mu, delta, ro;
 
-    Individual(int xi, int yi, int xf, int yf, int k, int mu, int delta, int ro) {
-        this.xi = xi;
-        this.yi = yi;
-        this.xf = xf;
-        this.yf = yf;
-        this.k = k;
-        this.mu = mu;
-        this.delta = delta;
-        this.ro = ro;
+    private Population population;
+    private Grid grid;
+
+    private int pathCost;
+    private int pathLength;
+    private ArrayList<int[]> path;
+
+    private double comfort;
+
+    Individual(int pathCost, int pathLength, double comfort, ArrayList<int[]> path, Population population, Grid grid) {
+        this.pathCost = pathCost;
+        this.pathLength = pathLength;
+        this.path = path;
+        this.comfort = comfort;
+
+        this.population = population;
+        this.grid = grid;
+        population.addIndividual(this);
+    }
+
+    Individual(Population population, Grid grid) {
+        this(0, 0, 0, new ArrayList<>(), population, grid);
+
+        this.path.add(new int[] {grid.getStartCoordinates()[0], grid.getStartCoordinates()[1]});
+        this.comfort = getComfort();
+    }
+
+    private int getDistToFinish() {
+        return Math.abs(path.getLast()[0] - grid.getEndCoordinates()[0])
+        + Math.abs(path.getLast()[1] - grid.getEndCoordinates()[1]);
+    }
+
+    private double getComfort() {
+        return Math.pow(1 - (pathCost - pathLength + 2) / ((grid.getCmax() - 1) * pathLength + 3), population.getK()) *
+                Math.pow(1 - getDistToFinish() / (grid.getSize() + 1), population.getK());
+    }
+
+    private void chronoBreak(int x, int y) {
+        int cycleStartIndex = path.indexOf(new int[] {x, y});
+        pathLength -= (path.size() - cycleStartIndex);
+        for (int i = path.size() - 1; i > cycleStartIndex; i--) {
+            pathCost -= grid.getCost(path.get(i)[0], path.get(i)[1], path.get(i - 1)[0], path.get(i - 1)[1]);
+            path.remove(i);
+        }
+    }
+
+    public int getDeathIndex() {
+        return (int) Math.ceil((1 - Math.log(1 - comfort)) * population.getMu());
+    }
+
+    public int getMoveIndex() {
+        return (int) Math.ceil((1 - Math.log(comfort)) * population.getDelta());
+    }
+
+    public int getReproductionIndex() {
+        return (int) Math.ceil((1 - Math.log(comfort)) * population.getRo());
+    }
+
+
+    public void death() {
+        population.removeIndividual(this);
+    }
+
+    public void move() {
+        ArrayList<int[]> validMoves = grid.getValidMoves(path.getLast()[0], path.getLast()[1]);
+
+        int randomIndex = (int) (Math.random() * validMoves.size());
+        int[] nextMove = validMoves.get(randomIndex);
+        int[] newPos = new int[] {path.getLast()[0] + nextMove[0], path.getLast()[1] + nextMove[1]};
+
+        if (path.contains(newPos)) {
+            // If the new position is already in the path, delete cycle
+            chronoBreak(newPos[0], newPos[1]);
+        }
+        else {
+            pathCost += grid.getCost(path.getLast()[0], path.getLast()[1], nextMove[0], nextMove[1]);
+            pathLength++;
+            path.add(new int[] {newPos[0], newPos[1]});
+        }
+
+        comfort = getComfort();
+
+        if (comfort > population.getBestComfort()) {
+            population.setBestPathCost(pathCost);
+            population.setBestPath(path);
+            population.setBestComfort(comfort);
+        }
+
+        if (path.getLast()[0] == grid.getEndCoordinates()[0] && path.getLast()[1] == grid.getEndCoordinates()[1]) {
+            if (!population.isPathComplete()) {
+                population.setIsPathComplete(true);
+                population.setBestPathCost(pathCost);
+                population.setBestPath(path);
+                population.setBestComfort(comfort);
+            }
+            if (pathCost < population.getBestPathCost() || population.getBestPath().isEmpty()) {
+                population.setBestPathCost(pathCost);
+                population.setBestPath(path);
+                population.setBestComfort(comfort);
+            }
+        }
+    }
+
+    public Individual reproduce() {
+        Individual child = new Individual(pathCost, pathLength, comfort, new ArrayList<int[]>(path), population, grid);
+
+        int lastPosIndex = (int) Math.ceil(this.pathLength * (0.9 + this.comfort * 0.1));
+
+        child.chronoBreak(path.get(lastPosIndex)[0], path.get(lastPosIndex)[1]);
+
+        return child;
     }
 }

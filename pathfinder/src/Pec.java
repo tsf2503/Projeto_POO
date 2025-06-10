@@ -1,33 +1,65 @@
+import java.util.PriorityQueue;
 import java.util.ArrayList;
 
 public class Pec {
-    private ArrayList<ArrayList<Event>> que;
+
+    private Simulator sim;
+    private PriorityQueue<Event> que;
+
     private int tau;
-    private int index = 0;  
+    private int time;
+    private int timeDiv;
 
-    public Pec(int tau) {
+    private int events = 0;
+
+    public Pec(int tau, Simulator sim) {
         this.tau = tau;
-        que = new ArrayList<ArrayList<Event>>(tau);
-        for (int i = 0; i < tau; i++) {
-            que.add(new ArrayList<Event>(1));
-        }
-        index = 0;
-    }
-    public void addEvent(Event e, int time) {
-        if (time < 0 || time >= tau) {
-            throw new IllegalArgumentException("Time must be between 0 and " + (tau - 1));
-        }
-        if (e == null) {
-            throw new IllegalArgumentException("Event cannot be null");
-        }
-        que.get(time).add(e);
+        this.timeDiv = (int) Math.floor(tau / 20);
+
+        this.sim = sim;
+        que = new PriorityQueue<>((e1, e2) -> Integer.compare(e1.getTime(), e2.getTime()));
     }
 
-    public ArrayList<Event> getEvents() {
-        if (index >= tau) {
-            System.exit(0); 
+    public void addEvent(Event e) {
+        if (e.getTime() >= 0 && e.getTime() < tau) {
+            que.add(e);
+        } else {
+            throw new IllegalArgumentException("Event time must be between 0 and " + tau);
         }
-        return que.get(index++);
+    }
+
+    public void next() {
+        if (que.isEmpty()) {
+            sim.end();
+            return;
+        }
+
+        if (peekNextEvent().getTime() == time) {
+            getNextEvent().execute();
+            events++;
+        } else {
+            if (time % timeDiv == 0) {
+                sim.update();
+                sim.print();
+            }
+            time++;
+        }
+    }
+
+    public int getTime() {
+        return time;
+    }
+
+    public int getEventsCount() {
+        return events;
+    }
+
+    private Event peekNextEvent() {
+        return que.peek();
+    }
+
+    private Event getNextEvent() {
+        return que.poll();
     }
 
     //TESTING
