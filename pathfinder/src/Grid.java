@@ -115,14 +115,5 @@ public class Grid {
                 ", cmax=" + cmax +
                 '}';
     }
-
-    // TESTING
-    public static void main(String[] args) {
-        // Example usage of Grid class
-        int[][] scz = {{1, 1, 3, 3, 5}}; // Special cost zone with cost 5
-        int[][] obs = {{2, 3}}; // Obstacle at (1, 1)
-        
-        
-    }
 }
     

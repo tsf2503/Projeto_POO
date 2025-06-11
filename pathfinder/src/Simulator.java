@@ -1,6 +1,8 @@
 import java.io.File;
+import java.util.Arrays;
 import java.util.Random;
 import java.util.Scanner;
+import java.util.stream.Collectors;
 
 public class Simulator {
     private Grid grid;
@@ -138,46 +140,42 @@ public class Simulator {
         int result;
         while ((result = pec.next()) != -1) {
             if (result == 1) {
-                System.out.println(this);
+                outputMidRun();
                 observation++;
             }
         }
-        System.out.println(this);
+        outputMidRun();
         outputResults();
     }
 
-    @Override
-    public String toString() {
+    private void outputMidRun() {
         boolean isCost = population.isPathComplete();
-        return isCost ?
-        "Observation:" + observation + ":\n\t\t" +
-                "Present time:\t\t\t" + pec.getTime() + "\n\t\t" +
-                "Number of realized events:\t" + pec.getEventsCount() + "\n\t\t" +
-                "Population size:\t\t" + population.getSize() + "\n\t\t" +
-                "Final point has been hit:\t" + "yes" + "\n\t\t" +
-                "Path of the best fit:\t" + population.getBestPath() + "\n\t\t" +
-                "Best path cost:\t\t\t" + population.getBestPathCost() + "\n\t\t"
-                :
-        "Observation:" + observation + ":\n\t\t" +
-                "Present time:\t\t\t" + pec.getTime() + "\n\t\t" +
-                "Number of realized events:\t" + pec.getEventsCount() + "\n\t\t" +
-                "Population size:\t\t" + population.getSize() + "\n\t\t" +
-                "Final point has been hit:\t" + "no" + "\n\t\t" +
-                "Path of the best fit:\t" + population.getBestPath() + "\n\t\t" +
-                "Best path cost:\t\t\t" + population.getBestComfort() + "\n\t\t";
+        String bestPathString = population.getBestPath().stream()
+            .map(coord -> "(" + coord[0] + ", " + coord[1] + ")")
+            .collect(Collectors.joining(", ", "[", "]"));
 
+        String output =
+            "Observation " + observation + ":\n\t\t" +
+                    "Present time:\t\t\t" + pec.getTime() + "\n\t\t" +
+                    "Number of realized events:\t" + pec.getEventsCount() + "\n\t\t" +
+                    "Population size:\t\t" + population.getSize() + "\n\t\t" +
+                    "Final point has been hit:\t" + (isCost ? "yes" : "no") + "\n\t\t" +
+                    "Path of the best fit:\t\t" + bestPathString + "\n\t\t" +
+                    "Best path cost:\t\t\t" + (isCost ? population.getBestPathCost() : population.getBestComfort()) + "\n\t\t";
+
+        System.out.println(output);
     }
 
     private void outputResults()
     {
         boolean isCost = population.isPathComplete();
+        String bestPathString = population.getBestPath().stream()
+            .map(coord -> "(" + coord[0] + ", " + coord[1] + ")")
+            .collect(Collectors.joining(", ", "[", "]"));
 
-        String output = isCost ?
-            "Best fit individual:\t" + population.getBestPath() +
-            "with cost:\t\t\t" + population.getBestPathCost()
-            :
-            "Best fit individual:\t" + population.getBestPath() +
-            "with comfort:\t\t" + population.getBestComfort();
+        String output =
+            "Best fit individual:\t" + bestPathString + " " +
+            "with cost: " + (isCost ? population.getBestPathCost() : population.getBestComfort()) + "\n";
 
         System.out.println(output);
     }

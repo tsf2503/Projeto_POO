@@ -16,14 +16,12 @@ abstract class Event {
     public Individual getIndividual() {
         return individual;
     }
-    public Pec getPec() {
-        return pec;
-    }
 
     @Override
     public String toString() {
         return "Event{" +
-                "time=" + time +
+                "type=" + getClass().getSimpleName() +
+                ", time=" + time +
                 ", individual=" + individual +
                 '}';
     }

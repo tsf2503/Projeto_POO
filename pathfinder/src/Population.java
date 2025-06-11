@@ -1,11 +1,13 @@
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Iterator;
+import java.util.PriorityQueue;
+import java.util.Random;
 
 public class Population {
 
     private HashSet<Individual> individuals;
 
-    private int size;
     private int maxSize;
 
     private boolean isPathComplete;
@@ -16,14 +18,13 @@ public class Population {
     private int k, mu, delta, ro;
 
     public Population(int maxSize, int k, int mu, int delta, int ro) {
-        this.size = 0;
         this.maxSize = maxSize;
         this.k = k;
         this.mu = mu;
         this.delta = delta;
         this.ro = ro;
 
-        individuals = new HashSet<>(size);
+        individuals = new HashSet<>();
         isPathComplete = false;
         bestPathCost = Integer.MAX_VALUE;
         bestPath = new ArrayList<>();
@@ -32,7 +33,7 @@ public class Population {
     }
 
     public int getSize() {
-        return size;
+        return individuals.size();
     }
 
     public boolean isPathComplete() {
@@ -77,7 +78,7 @@ public class Population {
     }
 
     public void setBestPath(ArrayList<int[]> bestPath) {
-        this.bestPath = bestPath;
+        this.bestPath = new ArrayList<>(bestPath);
     }
 
     public void setBestComfort(double bestComfort) {
@@ -89,27 +90,56 @@ public class Population {
     }
 
     public void addIndividual(Individual individual) {
-        if (individuals.size() < maxSize) {
-            individuals.add(individual);
-            size++;
-        } else {
-            // TODO Epidemic Event: Remove the worst individuals
+        individuals.add(individual);
+        if (individuals.size() > maxSize) {
+            epidemic(); // Remove individuals based on the epidemic logic
         }
     }
 
     public void removeIndividual(Individual individual) {
         if (individuals.remove(individual)) {
-            size--;
+            // Nothing to do here
         } else {
             // TODO Handle case where individual is not found
             throw new IllegalArgumentException("Individual not found in population.");
         }
     }
 
+    private HashSet<Individual> getKFittestIndividuals(int k) {
+        PriorityQueue<Individual> kFittestIndividuals = new PriorityQueue<>(
+                (i1, i2) -> Double.compare(i2.getComfort(), i1.getComfort())
+        );
+
+        for (Individual individual : individuals) {
+            kFittestIndividuals.offer(individual);
+            if (kFittestIndividuals.size() > k) {
+                kFittestIndividuals.poll(); // Remove the least fit individual
+            }
+        }
+
+        return new HashSet<>(kFittestIndividuals);
+
+    }
+
+    private void epidemic() {
+
+        HashSet<Individual> kFittest = getKFittestIndividuals(5);
+        Random random = new Random();
+
+        Iterator<Individual> iterator = individuals.iterator();
+        while (iterator.hasNext()) {
+            Individual individual = iterator.next();
+            if (!kFittest.contains(individual) && random.nextDouble() > individual.getComfort()) {
+                iterator.remove(); // Remove the individual if not in the k-fittest
+            }
+        }
+
+    }
+
     @Override
     public String toString() {
         return "Population{" +
-                "size=" + size +
+                "size=" + individuals.size() +
                 ", maxSize=" + maxSize +
                 ", isPathComplete=" + isPathComplete +
                 ", bestPathCost=" + bestPathCost +

@@ -1,4 +1,5 @@
 import java.util.ArrayList;
+import java.util.stream.Collectors;
 
 // TODO: implement Individual class
 public class Individual {
@@ -24,7 +25,7 @@ public class Individual {
         this(0, 0, 0, new ArrayList<>(), population, grid);
 
         this.path.add(new int[] {grid.getStartCoordinates()[0], grid.getStartCoordinates()[1]});
-        this.comfort = getComfort();
+        updateComfort();
     }
 
     public boolean isAlive() {
@@ -36,9 +37,13 @@ public class Individual {
         + Math.abs(path.getLast()[1] - grid.getEndCoordinates()[1]);
     }
 
-    private double getComfort() {
-        return Math.pow(1 - ((pathCost - getPathSize() + 2.0) / ((grid.getCmax() - 1.0) * getPathSize() + 3.0)), population.getK()) *
+    private void updateComfort() {
+        comfort = Math.pow(1 - ((pathCost - getPathSize() + 2.0) / ((grid.getCmax() - 1.0) * getPathSize() + 3.0)), population.getK()) *
                 Math.pow(1 - getDistToFinish() / (grid.getSize() + 1.0), population.getK());
+    }
+
+    public double getComfort() {
+        return comfort;
     }
 
     private int getPathSize() {
@@ -94,7 +99,7 @@ public class Individual {
             path.add(new int[] {newPos[0], newPos[1]});
         }
 
-        comfort = getComfort();
+        updateComfort();
 
         if (comfort > population.getBestComfort()) {
             population.setBestPathCost(pathCost);
@@ -107,12 +112,10 @@ public class Individual {
                 population.setIsPathComplete(true);
                 population.setBestPathCost(pathCost);
                 population.setBestPath(path);
-                population.setBestComfort(comfort);
             }
-            if (pathCost < population.getBestPathCost() || population.getBestPath().isEmpty()) {
+            else if (pathCost < population.getBestPathCost()) {
                 population.setBestPathCost(pathCost);
                 population.setBestPath(path);
-                population.setBestComfort(comfort);
             }
         }
     }
@@ -130,11 +133,14 @@ public class Individual {
 
     @Override
     public String toString() {
+        String pathString = path.stream()
+            .map(coord -> "(" + coord[0] + ", " + coord[1] + ")")
+            .collect(Collectors.joining(", ", "[", "]"));
         return "Individual{" +
                 "pathCost=" + pathCost +
-                ", pathLength=" + getPathSize() +
+                ", pathLength=" + path.size() +
                 ", comfort=" + comfort +
-                ", path=" + path +
+                ", path=" + pathString +
                 '}';
     }
 }
