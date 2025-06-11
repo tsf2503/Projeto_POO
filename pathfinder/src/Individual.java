@@ -7,14 +7,12 @@ public class Individual {
     private Grid grid;
 
     private int pathCost;
-    private int pathLength;
     private ArrayList<int[]> path;
 
     private double comfort;
 
     private Individual(int pathCost, int pathLength, double comfort, ArrayList<int[]> path, Population population, Grid grid) {
         this.pathCost = pathCost;
-        this.pathLength = pathLength;
         this.path = path;
         this.comfort = comfort;
 
@@ -30,7 +28,7 @@ public class Individual {
     }
 
     public boolean isAlive() {
-        return population != null;
+        return population.containsIndividual(this);
     }
 
     private int getDistToFinish() {
@@ -39,8 +37,12 @@ public class Individual {
     }
 
     private double getComfort() {
-        return Math.pow(1 - ((pathCost - pathLength + 2.0) / ((grid.getCmax() - 1.0) * pathLength + 3.0)), population.getK()) *
+        return Math.pow(1 - ((pathCost - getPathSize() + 2.0) / ((grid.getCmax() - 1.0) * getPathSize() + 3.0)), population.getK()) *
                 Math.pow(1 - getDistToFinish() / (grid.getSize() + 1.0), population.getK());
+    }
+
+    private int getPathSize() {
+        return path.size();
     }
 
     private void chronoBreak(int x, int y) {
@@ -52,7 +54,6 @@ public class Individual {
             }
         }
 
-        pathLength -= (path.size() - cycleStartIndex);
         for (int i = path.size() - 1; i > cycleStartIndex; i--) {
             pathCost -= grid.getCost(path.get(i)[0], path.get(i)[1], path.get(i - 1)[0], path.get(i - 1)[1]);
             path.remove(i);
@@ -74,7 +75,6 @@ public class Individual {
 
     public void death() {
         population.removeIndividual(this);
-        population = null;
     }
 
     public void move() {
@@ -91,7 +91,6 @@ public class Individual {
         }
         else {
             pathCost += grid.getCost(path.getLast()[0], path.getLast()[1], nextMove[0], nextMove[1]);
-            pathLength++;
             path.add(new int[] {newPos[0], newPos[1]});
         }
 
@@ -119,11 +118,12 @@ public class Individual {
     }
 
     public Individual reproduce() {
-        Individual child = new Individual(pathCost, pathLength, comfort, new ArrayList<int[]>(path), population, grid);
+        Individual child = new Individual(pathCost, getPathSize(), comfort, new ArrayList<int[]>(path), population, grid);
 
-        int lastPosIndex = (int) Math.ceil(this.pathLength * (0.9 + this.comfort * 0.1));
+        int lastPosIndex = (int) Math.ceil(getPathSize() * (0.9 + this.comfort * 0.1));
 
-        child.chronoBreak(path.get(lastPosIndex)[0], path.get(lastPosIndex)[1]);
+        child.chronoBreak(path.get(lastPosIndex - 1)[0], path.get(lastPosIndex - 1)[1]);
+        population.addIndividual(child);
 
         return child;
     }
@@ -132,7 +132,7 @@ public class Individual {
     public String toString() {
         return "Individual{" +
                 "pathCost=" + pathCost +
-                ", pathLength=" + pathLength +
+                ", pathLength=" + getPathSize() +
                 ", comfort=" + comfort +
                 ", path=" + path +
                 '}';

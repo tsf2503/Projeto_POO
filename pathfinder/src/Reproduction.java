@@ -10,6 +10,7 @@ public class Reproduction extends Event{
         // Implementation of the reprodruction event logic
         if (individual.isAlive()) {
             Individual child = individual.reproduce();
+
             pec.addEvent(new Reproduction(individual.getMoveTime() + time, individual, pec));
 
             pec.addEvent(new Move(child.getMoveTime() + time, child, pec));

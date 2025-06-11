@@ -84,6 +84,10 @@ public class Population {
         this.bestComfort = bestComfort;
     }
 
+    public boolean containsIndividual(Individual individual) {
+        return individuals.contains(individual);
+    }
+
     public void addIndividual(Individual individual) {
         if (individuals.size() < maxSize) {
             individuals.add(individual);
