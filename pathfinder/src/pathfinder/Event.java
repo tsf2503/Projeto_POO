@@ -1,3 +1,4 @@
+package pathfinder;
 abstract class Event {
 
     protected Pec pec;

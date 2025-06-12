@@ -1,3 +1,4 @@
+package pathfinder;
 import java.util.ArrayList;
 import java.util.stream.Collectors;
 

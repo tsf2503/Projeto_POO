@@ -1,4 +1,6 @@
+package pathfinder;
 //TODO: Implement the Move event logic
+
 public class Move extends Event {
 
     Move(double time, Individual individual, Pec pec) {

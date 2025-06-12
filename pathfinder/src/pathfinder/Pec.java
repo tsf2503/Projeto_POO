@@ -1,3 +1,4 @@
+package pathfinder;
 import java.util.PriorityQueue;
 
 public class Pec {
@@ -64,6 +65,10 @@ public class Pec {
 
     private Event getNextEvent() {
         return que.poll();
+    }
+
+    public int getTau() {
+        return tau;
     }
 
     @Override

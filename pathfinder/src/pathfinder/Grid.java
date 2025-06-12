@@ -1,3 +1,4 @@
+package pathfinder;
 import java.util.ArrayList;
 
 public class Grid {
@@ -103,6 +104,22 @@ public class Grid {
 
     public int[] getEndCoordinates() {
         return new int[]{xf, yf};
+    }
+
+    public int getM() {
+        return m; // Returns the number of rows
+    }
+
+    public int getN() {
+        return n; // Returns the number of columns
+    }
+
+    public int[][] getScz() {
+        return scz; // Returns the special cost zones
+    }
+
+    public int[][] getObs() {
+        return obs; // Returns the obstacles
     }
 
     @Override

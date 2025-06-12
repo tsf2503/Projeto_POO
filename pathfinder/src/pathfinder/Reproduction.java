@@ -1,4 +1,6 @@
+package pathfinder;
 //TODO: Implement the Reproduction event logic
+
 public class Reproduction extends Event{
 
     Reproduction(double time, Individual individual, Pec pec) {
