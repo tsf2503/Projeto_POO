@@ -68,6 +68,8 @@ public class Simulator {
     public void run()
     {
         int result;
+        outputMidRun();
+        observation++;
         while ((result = pec.next()) != -1) {
             if (result == 1) {
                 outputMidRun();
