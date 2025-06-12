@@ -1,50 +1,90 @@
+/*
+ * POO - Instituto Superior Técnico
+ *
+ * Guilherme Dias
+ * Francisco Coelho
+ * João Oliveira
+ * Tiago Ferreira
+ */
+
 package pathfinder;
+
 import java.util.ArrayList;
 
+/**
+ * Represents a grid for pathfinding, including start/end points, obstacles, and special cost zones.
+ */
 public class Grid {
-    private int m;
-    private int n;
+    private int m; // Number of columns
+    private int n; // Number of rows
     private int xi, yi; // Start coordinates
     private int xf, yf; // End coordinates
-    private int[][] scz; // Special Cost Zones
-    private int[][] obs; // Obstacles
+    private int[][] scz; // Special Cost Zones: each zone is [x1, y1, x2, y2, cost]
+    private int[][] obs; // Obstacles: each obstacle is [x, y]
+    private int cmax; // Maximum cost among all special cost zones
 
-    private int cmax;
-
+    /**
+     * Constructs a Grid with specified start/end coordinates, size, special cost zones, and obstacles.
+     *
+     * @param xi  Start x-coordinate
+     * @param yi  Start y-coordinate
+     * @param xf  End x-coordinate
+     * @param yf  End y-coordinate
+     * @param n   Number of rows
+     * @param m   Number of columns
+     * @param scz Special cost zones
+     * @param obs Obstacles
+     */
     Grid(int xi, int yi, int xf, int yf, int n, int m, int[][] scz, int[][] obs) {
-        this.xi = xi; // Start x-coordinate
-        this.yi = yi; // Start y-coordinate
-        this.xf = xf; // End x-coordinate
-        this.yf = yf; // End y-coordinate
-        this.n = n; // Number of rows
-        this.m = m; // Number of columns
-        this.scz = scz; // Special Cost Zones
-        this.obs = obs; // Obstacles
+        this.xi = xi;
+        this.yi = yi;
+        this.xf = xf;
+        this.yf = yf;
+        this.n = n;
+        this.m = m;
+        this.scz = scz;
+        this.obs = obs;
 
-        this.cmax = 0; // Maximum cost, initialized to 0
+        this.cmax = 0;
         if (scz.length == 0) {
             cmax = 1;
         } else {
             for (int[] zone : scz) {
                 if (zone[4] > cmax) {
-                    cmax = zone[4]; // Update maximum cost based on special zones
+                    cmax = zone[4];
                 }
             }
         }
     }
 
+    /**
+     * Returns the sum of the number of rows and columns.
+     *
+     * @return n + m
+     */
     public int getSize() {
         return n + m;
     }
 
+    /**
+     * Returns the maximum cost among all special cost zones.
+     *
+     * @return Maximum cost
+     */
     public int getCmax() {
-        return cmax; // Returns the maximum cost from special zones
+        return cmax;
     }
-    
+
+    /**
+     * Returns a list of valid moves (adjacent cells) from the given position, excluding obstacles.
+     *
+     * @param x Current x-coordinate
+     * @param y Current y-coordinate
+     * @return List of valid moves as int[] {x, y}
+     */
     public ArrayList<int[]> getValidMoves(int x, int y) {
-        // Returns a list of valid moves from position (x, y)
         ArrayList<int[]> validMoves = new ArrayList<>();
-        
+
         if (x > 1 && !isObstacle(x - 1, y)) {
             validMoves.add(new int[] {x - 1, y});
         }
@@ -57,35 +97,50 @@ public class Grid {
         if (y < m && !isObstacle(x, y + 1)) {
             validMoves.add(new int[] {x, y + 1});
         }
-        
+
         return validMoves;
     }
-    
+
+    /**
+     * Checks if the given position is an obstacle.
+     *
+     * @param x x-coordinate
+     * @param y y-coordinate
+     * @return true if (x, y) is an obstacle, false otherwise
+     */
     private boolean isObstacle(int x, int y) {
-        // Check if (x, y) is an obstacle
-        if (obs == null) return false; // No obstacles
+        if (obs == null) return false;
 
         for (int[] obstacle : obs) {
             if (obstacle[0] == x && obstacle[1] == y) {
-                return true; // It's an obstacle
+                return true;
             }
         }
-        return false; // Not an obstacle
+        return false;
     }
 
+    /**
+     * Returns the cost of moving from (xi, yi) to (xf, yf), considering special cost zones.
+     *
+     * @param xi Start x-coordinate
+     * @param yi Start y-coordinate
+     * @param xf End x-coordinate
+     * @param yf End y-coordinate
+     * @return Movement cost
+     */
     public int getCost(int xi, int yi, int xf, int yf) {
-        // Returns the cost of moving from (xi, yi) to (xf, yf)
-        if (scz == null) return 1; // Default cost if no special zones
+        if (scz == null) return 1;
 
+        // Ensure xi <= xf and yi <= yf for comparison
         if (xi > xf) {
             xi = xi ^ xf;
             xf = xi ^ xf;
-            xi = xi ^ xf; // Swap xi and xf
+            xi = xi ^ xf;
         }
         if (yi > yf) {
             yi = yi ^ yf;
             yf = yi ^ yf;
-            yi = yi ^ yf; // Swap yi and yf
+            yi = yi ^ yf;
         }
 
         int max = 1;
@@ -95,33 +150,68 @@ public class Grid {
                 max = zone[4];
             }
         }
-        return max; // Default cost if not in any special zone
+        return max;
     }
 
+    /**
+     * Returns the start coordinates as an array [xi, yi].
+     *
+     * @return Start coordinates
+     */
     public int[] getStartCoordinates() {
         return new int[]{xi, yi};
     }
 
+    /**
+     * Returns the end coordinates as an array [xf, yf].
+     *
+     * @return End coordinates
+     */
     public int[] getEndCoordinates() {
         return new int[]{xf, yf};
     }
 
+    /**
+     * Returns the number of columns.
+     *
+     * @return Number of columns
+     */
     public int getM() {
-        return m; // Returns the number of rows
+        return m;
     }
 
+    /**
+     * Returns the number of rows.
+     *
+     * @return Number of rows
+     */
     public int getN() {
-        return n; // Returns the number of columns
+        return n;
     }
 
+    /**
+     * Returns the special cost zones.
+     *
+     * @return Special cost zones
+     */
     public int[][] getScz() {
-        return scz; // Returns the special cost zones
+        return scz;
     }
 
+    /**
+     * Returns the obstacles.
+     *
+     * @return Obstacles
+     */
     public int[][] getObs() {
-        return obs; // Returns the obstacles
+        return obs;
     }
 
+    /**
+     * Returns a string representation of the grid.
+     *
+     * @return String describing the grid
+     */
     @Override
     public String toString() {
         return "Grid{" +
@@ -133,4 +223,3 @@ public class Grid {
                 '}';
     }
 }
-    

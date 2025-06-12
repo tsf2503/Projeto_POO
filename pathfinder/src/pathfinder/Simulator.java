@@ -1,12 +1,49 @@
+/*
+ * POO - Instituto Superior Técnico
+ *
+ * Guilherme Dias
+ * Francisco Coelho
+ * João Oliveira
+ * Tiago Ferreira
+ */
+
 package pathfinder;
+
 import java.util.stream.Collectors;
 
+/**
+ * Simulator class
+ * 
+ * Manages the simulation of individuals moving through a grid, handling events such as movement,
+ * reproduction, and death, and outputs simulation progress and results.
+ */
 public class Simulator {
     private Grid grid;
     private Pec pec;
     private Population population;
     private int observation;
-    
+
+    /**
+     * Constructs a Simulator instance.
+     * Initializes the grid, event controller (PEC), and population of individuals.
+     * Schedules initial events for each individual.
+     *
+     * @param n      Number of rows in the grid
+     * @param m      Number of columns in the grid
+     * @param xi     Start X coordinate
+     * @param yi     Start Y coordinate
+     * @param xf     End X coordinate
+     * @param yf     End Y coordinate
+     * @param scz    Special cost zones
+     * @param obs    Obstacles
+     * @param tau    Observation interval
+     * @param v      Initial population size
+     * @param vmax   Maximum population size
+     * @param k      Reproduction parameter
+     * @param mu     Mutation rate
+     * @param delta  Death rate
+     * @param ro     Comfort parameter
+     */
     public Simulator(int n, int m, int xi, int yi, int xf, int yf, int[][] scz, int[][] obs, int tau, int v, int vmax, int k, int mu, int delta, int ro)
     {
         // Initialize the grid, pec, and individuals
@@ -24,6 +61,10 @@ public class Simulator {
         observation = 0;
     }
 
+    /**
+     * Runs the simulation.
+     * Processes events until completion, outputting intermediate and final results.
+     */
     public void run()
     {
         int result;
@@ -37,6 +78,9 @@ public class Simulator {
         outputResults();
     }
 
+    /**
+     * Outputs the current state of the simulation at each observation interval.
+     */
     private void outputMidRun() {
         boolean isCost = population.isPathComplete();
         String bestPathString = population.getBestPath().stream()
@@ -55,6 +99,9 @@ public class Simulator {
         System.out.println(output);
     }
 
+    /**
+     * Outputs the final results of the simulation.
+     */
     private void outputResults()
     {
         boolean isCost = population.isPathComplete();
@@ -69,6 +116,9 @@ public class Simulator {
         System.out.println(output);
     }
 
+    /**
+     * Prints the current configuration of the simulation, including grid and population parameters.
+     */
     public void printConfig()
     {
         int[][] scz = grid.getScz();

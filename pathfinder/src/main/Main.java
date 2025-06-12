@@ -1,3 +1,24 @@
+/*
+ * POO - Instituto Superior Técnico
+ *
+ * Guilherme Dias
+ * Francisco Coelho
+ * João Oliveira
+ * Tiago Ferreira
+ * 
+ * Pathfinder is a stochastic simulation project that tries to achieve the optimal path
+ * in a given grid, with constraints: obstacles, special cost zones and its own size.
+ * It achieves this by simulating individuals that can randomly (given their comfort/fitness)
+ * move, reproduce and die, creating a population that evolves over time. The fittest individuals
+ * are more likely to survive, leading to an optimal path being found.
+ * 
+ * This is the entry point.
+ */
+
+/**
+ * Main class for the Pathfinder project.
+ * Handles command-line argument parsing, random/file input, and simulation startup.
+ */
 package main;
 import java.io.File;
 import java.util.Random;
@@ -7,6 +28,9 @@ import pathfinder.Simulator;
 
 public class Main {
 
+    /**
+     * Prints usage instructions and parameter descriptions for the program.
+     */
     private static void printHelp()
     {
         System.out.println("Usage: pathfinder [-r <n> <m> <xi> <yi> <xf> <yf> <n_scz> <n_obs> <tau> <v> <vmax> <k> <mu> <delta> <ro>] | [-f <input_file>]");
@@ -38,10 +62,19 @@ public class Main {
         System.out.println();
     }
 
+    /**
+     * Main entry point for the Pathfinder program.
+     * Parses command-line arguments, initializes simulation parameters (randomly or from file),
+     * and starts the simulation.
+     *
+     * @param args Command-line arguments
+     */
     public static void main(String[] args) {
-        // Get correct command line/terminal parameters
+        // Simulation parameters
         int n = 0, m = 0, xi = 0, yi = 0, xf = 0, yf = 0, n_scz = 0, n_obs = 0, tau = 0, v = 0, k = 0, mu = 0, delta = 0, ro = 0, vmax = 0;
         int[][] scz = null, obs = null;
+
+        // Handle random parameter mode
         if (args[0].equals("-r")) {
             try {
                 n = Integer.parseInt(args[1]);
@@ -59,7 +92,6 @@ public class Main {
                 mu = Integer.parseInt(args[13]);
                 delta = Integer.parseInt(args[14]);
                 ro = Integer.parseInt(args[15]);
-                
             } catch (NumberFormatException e) {
                 System.out.println("Error: Incorrect arguments");
                 printHelp();
@@ -74,10 +106,8 @@ public class Main {
             for (int i = 0; i < n_scz; i++) {
                 scz[i][0] = r.nextInt(m) + 1; // xn
                 scz[i][1] = r.nextInt(n) + 1; // yn
-
                 scz[i][2] = r.nextInt(m) + 1; // xn'
                 scz[i][3] = r.nextInt(n) + 1; // yn'
-
                 scz[i][4] = r.nextInt(10) + 1; // cost
             }
 
@@ -86,6 +116,7 @@ public class Main {
                 obs[i][1] = r.nextInt(n) + 1; // y
             }
         }
+        // Handle file input mode
         else if (args[0] == "-f") {
             File inputFile = new File(args[1]);
             if (!inputFile.exists()) {
@@ -115,8 +146,8 @@ public class Main {
                 scz = new int[n_scz][5];
                 obs = new int[n_obs][2];
 
-                scanner.nextLine(); 
-                scanner.nextLine(); 
+                scanner.nextLine(); // Skip to next line
+                scanner.nextLine(); // Skip to next line
 
                 for (int i = 0; i < n_scz; i++) {
                     scz[i][0] = scanner.nextInt(); // xn
@@ -126,8 +157,8 @@ public class Main {
                     scz[i][4] = scanner.nextInt(); // cost
                 }
 
-                scanner.nextLine(); 
-                scanner.nextLine();
+                scanner.nextLine(); // Skip to next line
+                scanner.nextLine(); // Skip to next line
 
                 for (int i = 0; i < n_obs; i++) {
                     obs[i][0] = scanner.nextInt(); // x
@@ -140,6 +171,7 @@ public class Main {
                 System.exit(1);
             }
         }
+        // Handle invalid arguments
         else{
             printHelp();
             System.exit(1);
