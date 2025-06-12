@@ -113,7 +113,7 @@ public class Simulator {
 
         String output =
             "Best fit individual:\t" + bestPathString + " " +
-            "with cost: " + (isCost ? population.getBestPathCost() : population.getBestComfort()) + "\n";
+            "with " + (isCost ? "cost" : "comfort") + ": " + (isCost ? population.getBestPathCost() : population.getBestComfort()) + "\n";
 
         System.out.println(output);
     }
@@ -125,9 +125,9 @@ public class Simulator {
     {
         int[][] scz = grid.getScz();
         int[][] obs = grid.getObs();
-        System.out.printf("%d %d %d %d %d %d %d %d %d %d %d %d %d %d\n", grid.getN(), grid.getM(), grid.getStartCoordinates()[0], grid.getStartCoordinates()[1],
+        System.out.printf("%d %d %d %d %d %d %d %d %d %d %d %d %d %d %d\n", grid.getN(), grid.getM(), grid.getStartCoordinates()[0], grid.getStartCoordinates()[1],
                                                 grid.getEndCoordinates()[0], grid.getEndCoordinates()[1], scz.length, obs.length, pec.getTau(),
-                                                population.getSize(), population.getK(), population.getMu(), population.getDelta(), population.getRo());
+                                                population.getSize(), population.getMaxSize(), population.getK(), population.getMu(), population.getDelta(), population.getRo());
         System.out.println("Special Cost Zones:");
         for (int[] zone : scz) {
             System.out.printf("%d %d %d %d %d\n", zone[0], zone[1], zone[2], zone[3], zone[4]);

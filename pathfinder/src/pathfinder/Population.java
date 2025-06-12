@@ -131,6 +131,14 @@ public class Population {
     }
 
     /**
+     * Gets the maximum size of the population.
+     * @return Maximum population size
+     */
+    public int getMaxSize() {
+        return maxSize;
+    }
+
+    /**
      * Sets whether a complete path has been found.
      * @param isPathComplete True if path is complete
      */
