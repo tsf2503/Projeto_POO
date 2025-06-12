@@ -117,7 +117,7 @@ public class Main {
             }
         }
         // Handle file input mode
-        else if (args[0] == "-f") {
+        else if (args[0].equals("-f")) {
             File inputFile = new File(args[1]);
             if (!inputFile.exists()) {
                 System.out.println("Error: File does not exist");
